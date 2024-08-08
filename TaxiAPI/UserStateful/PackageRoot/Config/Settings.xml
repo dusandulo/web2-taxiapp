@@ -8,9 +8,8 @@
   <Section Name="ReplicatorSecurityConfig" />
 
   <!-- Add your custom configuration sections and parameters here. -->
-  <!--
-  <Section Name="MyConfigSection">
-    <Parameter Name="MyParameter" Value="Value1" />
-  </Section>
-  -->
+
+	<Section Name="DatabaseConfig">
+		<Parameter Name="ConnectionString" Value="Server=localhost,1433;Database=Bazapodataka;User Id=sa;Password=Dusan123!;TrustServerCertificate=true;" />
+	</Section>
 </Settings>

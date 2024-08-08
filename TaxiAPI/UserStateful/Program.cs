@@ -1,8 +1,8 @@
-using System;
 using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Fabric;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Services.Runtime;
+using Microsoft.EntityFrameworkCore;
 
 namespace UserStateful
 {
@@ -20,8 +20,24 @@ namespace UserStateful
                 // When Service Fabric creates an instance of this service type,
                 // an instance of the class is created in this host process.
 
+                CodePackageActivationContext context = FabricRuntime.GetActivationContext();
+                var configSettings = context.GetConfigurationPackageObject("Config").Settings;
+                var data = configSettings.Sections["DatabaseConfig"];
+                var connectionString = "";
+                foreach (var parameter in data.Parameters)
+                {
+                    if (parameter.Name == "ConnectionString")
+                    {
+                        connectionString = parameter.Value;
+                    }
+                }
+
+                var provider = new ServiceCollection()
+                    .AddDbContext<UserDbContext>(options => options.UseSqlServer(connectionString))
+                    .BuildServiceProvider();
+
                 ServiceRuntime.RegisterServiceAsync("UserStatefulType",
-                    context => new UserStateful(context)).GetAwaiter().GetResult();
+                    context => new UserStateful(context, provider)).GetAwaiter().GetResult();
 
                 ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(UserStateful).Name);
 

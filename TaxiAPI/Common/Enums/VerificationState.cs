@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Common.Enums
+﻿namespace Common.Enums
 {
-    public class VerificationState
+    public enum VerificationState
     {
+        Verified = 0,
+        Unverified = 1,
+        Processing = 2
     }
 }
