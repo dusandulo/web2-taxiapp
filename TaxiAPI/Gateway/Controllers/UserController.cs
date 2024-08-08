@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Gateway.Controllers
 {
@@ -49,6 +50,32 @@ namespace Gateway.Controllers
             }
 
             return Ok(new { Token = token });
+        }
+
+        [HttpPut("update")]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfile([FromBody] UserModel user)
+        {
+            if (user == null || user.Id == Guid.Empty)
+            {
+                return BadRequest("Invalid user data.");
+            }
+
+            var userEmail = User.Identity.Name;
+            if (userEmail != user.Email)
+            {
+                return Forbid("You can only update your own profile.");
+            }
+
+            try
+            {
+                await _userCommunication.UpdateProfile(user);
+                return Ok("Profile updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpGet("all")]

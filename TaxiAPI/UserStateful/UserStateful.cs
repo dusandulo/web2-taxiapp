@@ -12,6 +12,7 @@ using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.EntityFrameworkCore;
+using BCrypt.Net;
 
 namespace UserStateful
 {
@@ -92,6 +93,55 @@ namespace UserStateful
             catch (Exception ex)
             {
                 ServiceEventSource.Current.ServiceMessage(this.Context, "Error saving user to database: {0}", ex.Message);
+                throw;
+            }
+        }
+
+        public async Task UpdateProfile(UserModel user)  // Add this method
+        {
+            if (user == null || user.Id == Guid.Empty)
+            {
+                throw new ArgumentException("User and user ID are required.");
+            }
+
+            try
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+                    var existingUser = await dbContext.Users.FindAsync(user.Id);
+
+                    if (existingUser == null)
+                    {
+                        throw new InvalidOperationException("User not found.");
+                    }
+
+                    existingUser.UserName = user.UserName;
+                    existingUser.Email = user.Email;
+                    existingUser.Password = !string.IsNullOrEmpty(user.Password) ? BCrypt.Net.BCrypt.HashPassword(user.Password) : existingUser.Password;
+                    existingUser.Name = user.Name;
+                    existingUser.LastName = user.LastName;
+                    existingUser.Birthday = user.Birthday;
+                    existingUser.Address = user.Address;
+                    existingUser.Role = user.Role;
+                    existingUser.Image = user.Image;
+                    existingUser.VerificationState = user.VerificationState;
+
+                    dbContext.Users.Update(existingUser);
+                    await dbContext.SaveChangesAsync();
+                }
+
+                var usersDict = await this.StateManager.GetOrAddAsync<IReliableDictionary<Guid, UserModel>>("users");
+
+                using (var tx = this.StateManager.CreateTransaction())
+                {
+                    await usersDict.AddOrUpdateAsync(tx, user.Id, user, (k, v) => v);
+                    await tx.CommitAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                ServiceEventSource.Current.ServiceMessage(this.Context, "Error updating user profile: {0}", ex.Message);
                 throw;
             }
         }

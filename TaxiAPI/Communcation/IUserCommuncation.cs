@@ -15,5 +15,6 @@ namespace Communication
         Task<IEnumerable<UserModel>> GetAllUsers();
         Task<UserModel?> GetUserByEmail(string email);
         Task<string?> Authenticate(string email, string password);
+        Task UpdateProfile(UserModel user);
     }
 }
