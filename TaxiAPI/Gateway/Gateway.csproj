@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Communcation\Communcation.csproj" />
+    <ProjectReference Include="..\RideStateful\RideStateful.csproj" />
     <ProjectReference Include="..\UserStateful\UserStateful.csproj" />
   </ItemGroup>
 

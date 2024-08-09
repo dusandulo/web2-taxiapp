@@ -97,7 +97,7 @@ namespace UserStateful
             }
         }
 
-        public async Task UpdateProfile(UserModel user)  // Add this method
+        public async Task UpdateProfile(UserModel user) 
         {
             if (user == null || user.Id == Guid.Empty)
             {

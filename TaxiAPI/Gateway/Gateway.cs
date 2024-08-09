@@ -16,6 +16,7 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using UserStateful;
 using Microsoft.EntityFrameworkCore;
+using Common.Models;
 
 namespace Gateway
 {
@@ -36,6 +37,7 @@ namespace Gateway
                         var builder = WebApplication.CreateBuilder();
 
                         builder.Services.AddSingleton<StatelessServiceContext>(serviceContext);
+
                         builder.WebHost
                                .UseKestrel()
                                .UseContentRoot(Directory.GetCurrentDirectory())
@@ -45,12 +47,10 @@ namespace Gateway
                         builder.Services.AddControllers();
                         builder.Services.AddEndpointsApiExplorer();
 
-                        // Configure Swagger with JWT support
                         builder.Services.AddSwaggerGen(c =>
                         {
                             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Gateway API", Version = "v1" });
 
-                            // Define the security scheme
                             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                             {
                                 In = ParameterLocation.Header,
@@ -59,7 +59,6 @@ namespace Gateway
                                 Type = SecuritySchemeType.ApiKey
                             });
 
-                            // Define the security requirements
                             c.AddSecurityRequirement(new OpenApiSecurityRequirement
                             {
                                 {
@@ -77,11 +76,14 @@ namespace Gateway
                         });
 
                         builder.Services.AddSingleton<IUserCommunication, UserService>();
+                        builder.Services.AddSingleton<IRideCommunication, RideService>();
 
                         builder.Services.AddDbContext<UserDbContext>(options =>
                             options.UseSqlServer(builder.Configuration.GetConnectionString("UserDatabase")));
 
-                        // Add JWT authentication
+                        builder.Services.AddDbContext<RideDbContext>(options =>
+                            options.UseSqlServer(builder.Configuration.GetConnectionString("RideDatabase")));
+
                         var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
                         builder.Services.AddAuthentication(options =>
                         {

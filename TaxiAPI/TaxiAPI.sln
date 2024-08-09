@@ -5,13 +5,15 @@ VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{A07B5EB6-E848-4116-A8D0-A826331D98C6}") = "TaxiAPI", "TaxiAPI\TaxiAPI.sfproj", "{60B87C41-D1F9-4789-8695-5A8169458B24}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gateway", "Gateway\Gateway.csproj", "{FB03B7FD-818C-4215-9921-D4CA85B67F45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gateway", "Gateway\Gateway.csproj", "{FB03B7FD-818C-4215-9921-D4CA85B67F45}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{A22680E0-6C75-4FC3-914A-BF223F0EE9B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{A22680E0-6C75-4FC3-914A-BF223F0EE9B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Communcation", "Communcation\Communcation.csproj", "{61A13BB4-01BF-41FC-99E3-0BD6F14D2978}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Communcation", "Communcation\Communcation.csproj", "{61A13BB4-01BF-41FC-99E3-0BD6F14D2978}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserStateful", "UserStateful\UserStateful.csproj", "{4F8E6982-7B7B-4943-9833-99B6AF8013F5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserStateful", "UserStateful\UserStateful.csproj", "{4F8E6982-7B7B-4943-9833-99B6AF8013F5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RideStateful", "RideStateful\RideStateful.csproj", "{3DFFF2EA-786A-4E57-ABD6-62C292809184}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,6 +67,14 @@ Global
 		{4F8E6982-7B7B-4943-9833-99B6AF8013F5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4F8E6982-7B7B-4943-9833-99B6AF8013F5}.Release|x64.ActiveCfg = Release|Any CPU
 		{4F8E6982-7B7B-4943-9833-99B6AF8013F5}.Release|x64.Build.0 = Release|Any CPU
+		{3DFFF2EA-786A-4E57-ABD6-62C292809184}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DFFF2EA-786A-4E57-ABD6-62C292809184}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DFFF2EA-786A-4E57-ABD6-62C292809184}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3DFFF2EA-786A-4E57-ABD6-62C292809184}.Debug|x64.Build.0 = Debug|Any CPU
+		{3DFFF2EA-786A-4E57-ABD6-62C292809184}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DFFF2EA-786A-4E57-ABD6-62C292809184}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DFFF2EA-786A-4E57-ABD6-62C292809184}.Release|x64.ActiveCfg = Release|Any CPU
+		{3DFFF2EA-786A-4E57-ABD6-62C292809184}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
