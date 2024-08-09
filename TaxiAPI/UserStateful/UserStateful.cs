@@ -19,7 +19,6 @@ namespace UserStateful
     internal sealed class UserStateful : StatefulService, IUserCommunication
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly string _key = "your_secret_key_here"; // TODO: from config
 
         public UserStateful(StatefulServiceContext context, IServiceProvider serviceProvider)
             : base(context)

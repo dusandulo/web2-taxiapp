@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Fabric;
 using System.IO;
@@ -43,6 +43,17 @@ namespace Gateway
                                .UseContentRoot(Directory.GetCurrentDirectory())
                                .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.None)
                                .UseUrls(url);
+
+                        builder.Services.AddCors(options =>
+                        {
+                            options.AddPolicy("AllowSpecificOrigins",
+                                builder =>
+                                {
+                                    builder.WithOrigins("http://localhost:3000")
+                                           .AllowAnyMethod()
+                                           .AllowAnyHeader();
+                                });
+                        });
 
                         builder.Services.AddControllers();
                         builder.Services.AddEndpointsApiExplorer();
@@ -118,6 +129,8 @@ namespace Gateway
                                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Gateway API V1");
                             });
                         }
+
+                        app.UseCors("AllowSpecificOrigins");
 
                         app.UseAuthentication();
                         app.UseAuthorization();
