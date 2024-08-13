@@ -8,6 +8,7 @@ export const register = async (userData: {
   lastName: string;
   address: string;
   birthday: string;
+  role: number;
 }) => {
   return apiClient.post('/users/register', userData);
 };

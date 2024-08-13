@@ -91,5 +91,18 @@ namespace Gateway.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpGet("email/{email}")]
+        [Authorize]
+        public async Task<IActionResult> GetUserByEmail(string email)
+        {
+            var user = await _userCommunication.GetUserByEmail(email);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
+            return Ok(user);
+        }
     }
 }

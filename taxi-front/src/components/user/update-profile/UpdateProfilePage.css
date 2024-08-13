@@ -1,0 +1,88 @@
+.update-profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  padding: 20px;
+}
+
+.update-profile-box {
+  background-color: #ffffff;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 100%;
+  position: relative; /* Make this box the containing block for the link */
+}
+
+.update-profile-title {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 24px;
+  color: #333;
+}
+
+.update-profile-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.update-profile-label {
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #555;
+}
+
+.update-profile-input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  color: #333;
+  background-color: #f9f9f9;
+  transition: border-color 0.3s ease;
+}
+
+.update-profile-input:focus {
+  border-color: #007bff;
+  outline: none;
+  background-color: #fff;
+}
+
+.update-profile-button {
+  margin-top: 20px;
+  padding: 12px 20px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #e65c00;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.update-profile-button:hover {
+  background-color: #ff6600;
+}
+
+/* New styles for the Back to Dashboard link */
+.back-to-dashboard-link {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 8px 15px;
+  background-color: #e65c00;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.back-to-dashboard-link:hover {
+  background-color: #f06000;
+}

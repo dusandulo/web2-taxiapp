@@ -1,0 +1,65 @@
+.create-ride-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #ffffff;
+    padding: 20px;
+  }
+  
+  .create-ride-box {
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #DDDEDA;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+  }
+  
+  .create-ride-title {
+    text-align: center;
+    color: #333333;
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+  
+  .create-ride-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+  }
+  
+  .create-ride-label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333333;
+  }
+  
+  .create-ride-input {
+    width: 95%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
+  
+  .create-ride-button {
+    padding: 10px;
+    color: white;
+    background-color: #ff6f00;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .create-ride-button:hover {
+    background-color: #e65c00;
+  }
+  

@@ -35,6 +35,7 @@ namespace Gateway
                         ServiceEventSource.Current.ServiceMessage(serviceContext, $"Starting Kestrel on {url}");
 
                         var builder = WebApplication.CreateBuilder();
+                         builder.Services.AddSignalR();
 
                         builder.Services.AddSingleton<StatelessServiceContext>(serviceContext);
 
@@ -43,6 +44,11 @@ namespace Gateway
                                .UseContentRoot(Directory.GetCurrentDirectory())
                                .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.None)
                                .UseUrls(url);
+
+                        builder.WebHost.UseUrls(url)
+                                   .UseKestrel()
+                                   .UseContentRoot(Directory.GetCurrentDirectory())
+                                   .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.None);
 
                         builder.Services.AddCors(options =>
                         {
@@ -119,6 +125,8 @@ namespace Gateway
 
                         builder.Services.AddAuthorization();
 
+                        builder.Services.AddHttpContextAccessor();
+
                         var app = builder.Build();
 
                         if (app.Environment.IsDevelopment())
@@ -134,6 +142,14 @@ namespace Gateway
 
                         app.UseAuthentication();
                         app.UseAuthorization();
+
+                        app.UseRouting();
+                        app.UseEndpoints(endpoints =>
+                            {
+                                endpoints.MapControllers();
+                                endpoints.MapHub<RideHub>("/rideHub");
+                            });
+
                         app.MapControllers();
 
                         return app;

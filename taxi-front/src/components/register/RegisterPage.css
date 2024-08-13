@@ -1,0 +1,79 @@
+.login-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Ensures the container takes the full height of the screen */
+    background-color: #ffffff;
+    padding: 20px; /* Adds padding to avoid cutting off the content on smaller screens */
+  }
+  
+  .logo-image {
+    width: 80px; /* Slightly smaller to fit better on smaller screens */
+    height: 80px;
+    margin: 20px auto;
+  }
+  
+  .login-box {
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #DDDEDA;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+  }
+  
+  .login-title {
+    text-align: center;
+    color: #333333;
+    margin-bottom: 20px; /* Adds space between the title and the form */
+    font-size: 24px; /* Larger font for better readability */
+  }
+  
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Slightly reduce gap to fit everything better */
+    width: 100%;
+  }
+  
+  .login-label {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333333;
+    margin-bottom: 5px; /* Adds space between label and input */
+  }
+  
+  .login-input {
+    width: 100%; /* Ensure input fields take the full width available */
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+  
+  .login-button {
+    padding: 10px;
+    color: white;
+    background-color: #ff6f00;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px; /* Adds space above the button */
+  }
+  
+  .login-button:hover {
+    background-color: #e65c00;
+  }
+  
+  p {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 14px;
+  }
+  

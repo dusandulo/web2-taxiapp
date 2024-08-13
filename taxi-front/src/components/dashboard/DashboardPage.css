@@ -1,0 +1,122 @@
+.dashboard-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f7f7f7;
+  padding: 20px;
+}
+
+.update-profile-link {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #e65c00;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.update-profile-link:hover {
+  background-color: #ff6600;
+}
+
+.dashboard-box {
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.dashboard-title {
+  text-align: center;
+  color: #333333;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.rides-list {
+  list-style-type: none;
+  padding: 0;
+  width: 100%;
+}
+
+.ride-item {
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.ride-item-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.ride-address {
+  font-size: 18px;
+  font-weight: 500;
+  color: #333333;
+  margin-bottom: 10px;
+}
+
+.ride-details {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.ride-info {
+  font-size: 14px;
+  color: #555555;
+}
+
+.ride-info span {
+  font-weight: 600;
+}
+
+.accept-ride-button {
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.accept-ride-button:hover {
+  background-color: #45a049;
+}
+
+/* Status colors */
+.status-pending {
+  color: #ffcc00; /* Yellow for PENDING */
+  font-weight: bold;
+}
+
+.status-confirmed {
+  color: #80c904; /* Light green for CONFIRMED */
+  font-weight: bold;
+}
+
+.status-finished {
+  color: #006400; /* Dark green for FINISHED */
+  font-weight: bold;
+}

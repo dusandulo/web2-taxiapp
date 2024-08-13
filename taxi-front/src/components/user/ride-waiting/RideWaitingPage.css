@@ -1,0 +1,33 @@
+/* General container styling */
+.ride-waiting-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+  }
+  
+  /* Styling for the countdown box */
+  .countdown-box {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  /* Styling for the countdown text */
+  .countdown {
+    font-size: 48px;
+    color: #ff6f00;
+    margin: 20px 0;
+  }
+  
+  /* Heading styling */
+  .countdown-box h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  

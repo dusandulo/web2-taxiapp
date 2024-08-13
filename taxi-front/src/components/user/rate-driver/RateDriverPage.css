@@ -1,0 +1,17 @@
+.rate-driver-container {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .stars {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    font-size: 30px;
+    cursor: pointer;
+  }
+  
+  .star.selected {
+    color: gold;
+  }
+  
