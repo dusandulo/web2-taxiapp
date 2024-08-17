@@ -62,4 +62,9 @@
   .create-ride-button:hover {
     background-color: #e65c00;
   }
+  .ride-estimation{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+  }
   

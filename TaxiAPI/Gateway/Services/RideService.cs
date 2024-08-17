@@ -52,7 +52,7 @@ namespace Communication
         {
             var random = new Random();
             int estimatedPrice = random.Next(500, 2000);
-            int estimatedTime = random.Next(5, 20) * 60; 
+            int estimatedTime = random.Next(10, 40); 
 
             var response = new RideEstimateResponseDto
             {
@@ -80,6 +80,11 @@ namespace Communication
         public async Task<IEnumerable<RideModel>> GetPendingRidesAsync()
         {
             return await _rideCommunication.GetPendingRidesAsync();
+        }
+
+        public Task<IEnumerable<RideModel>> GetConfirmedRidesAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 }

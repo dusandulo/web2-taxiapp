@@ -1,26 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getRideById } from '../../../services/rideService';
+import hubConnection, { startConnection, subscribeToRideConfirmation, subscribeToRideTimeUpdate } from '../../../services/signalRService';
 import './RideWaitingPage.css';
+
+enum RideStatus {
+  Pending = 0,
+  Confirmed = 1,
+  Finished = 2,
+}
 
 const RideWaiting: React.FC = () => {
   const [waitingTime, setWaitingTime] = useState<number | null>(null);
   const [rideTime, setRideTime] = useState<number | null>(null);
-  const [status, setStatus] = useState<string | null>(null); // Dodato za praćenje statusa vožnje
-  const { rideId } = useParams<{ rideId: string }>(); // Dohvatanje rideId iz URL-a
+  const [status, setStatus] = useState<RideStatus | null>(null);
+  const { rideId } = useParams<{ rideId: string }>();
 
   useEffect(() => {
     if (!rideId) return;
 
-    // Inicijalno dohvatite podatke o vožnji sa servera
     const fetchRideData = async () => {
       try {
         const rideData = await getRideById(rideId);
-
-        // Postavite početno vreme čekanja i vreme trajanja vožnje
+        console.log('Initial Ride Data:', rideData);
         setWaitingTime(rideData.arrivalTimeInSeconds);
-        setRideTime(rideData.driverTimeInSeconds);
-        setStatus(rideData.status); // Postavite status vožnje
+        setRideTime(rideData.arrivalTimeInSeconds);
+        setStatus(rideData.status);
       } catch (error) {
         console.error('Failed to fetch ride data:', error);
       }
@@ -28,43 +33,53 @@ const RideWaiting: React.FC = () => {
 
     fetchRideData();
 
-    // Interval za ažuriranje vremena čekanja
-    const interval = setInterval(() => {
-      setWaitingTime((prevTime) => {
-        if (prevTime !== null && prevTime > 0) {
-          return prevTime - 1;
-        } else if (prevTime === 0) {
-          clearInterval(interval);
-          startRideTimer(); // Pokrenite odbrojavanje za vožnju
-        }
-        return prevTime;
-      });
-    }, 1000);
+    startConnection().then(async () => {
+      console.log('SignalR Connection Established');
+      await hubConnection.invoke('JoinGroup', rideId);
+      console.log(`Joined group for ride ${rideId}`);
 
-    return () => clearInterval(interval);
+      subscribeToRideConfirmation((confirmedRide) => {
+        console.log('Ride confirmed event received:', confirmedRide);
+        if (confirmedRide.id === rideId) {
+          setStatus(confirmedRide.status);
+          setWaitingTime(confirmedRide.arrivalTimeInSeconds);
+          setRideTime(confirmedRide.arrivalTimeInSeconds);
+        }
+      });
+
+      subscribeToRideTimeUpdate((timeUpdate) => {
+        console.log('Ride time update event received on client:', timeUpdate);
+        setWaitingTime(timeUpdate);
+      });
+    });
+
+    return () => {
+      hubConnection.off('RideConfirmed');
+      hubConnection.off('UpdateRideTime');
+    };
   }, [rideId]);
 
-  const startRideTimer = () => {
-    const rideInterval = setInterval(() => {
-      setRideTime((prevTime) => {
-        if (prevTime !== null && prevTime > 0) {
-          return prevTime - 1;
-        } else {
-          clearInterval(rideInterval);
-          // Završetak vožnje
-          return 0;
-        }
-      });
+  useEffect(() => {
+    if (waitingTime === null) return;
+
+    let myInterval = setInterval(() => {
+      if (waitingTime > 0) {
+        setWaitingTime(waitingTime - 1);
+      } else {
+        clearInterval(myInterval);
+      }
     }, 1000);
-  };
+
+    return () => clearInterval(myInterval);
+  }, [waitingTime]);
 
   return (
     <div className="ride-waiting-container">
-      {status === 'Pending' ? (
+      {status === RideStatus.Pending ? (
         <h2>Waiting for a free driver to accept the ride...</h2>
       ) : waitingTime !== null && waitingTime > 0 ? (
         <div className="countdown-box">
-          <h2>Driver will arrive in:</h2>
+          <h2>Your ride will arrive in:</h2>
           <p className="countdown">{waitingTime} seconds</p>
         </div>
       ) : rideTime !== null ? (

@@ -1,9 +1,21 @@
 import apiClient from './apiClient';
 
-export const getAllRides = async () => {
+export const getAllRides = async (userId: string) => {
   const token = localStorage.getItem('token');
   
-  const response = await apiClient.get('/ride/getallrides', {
+  const response = await apiClient.get(`/ride/getallrides?userId=${userId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  return response.data;
+};
+
+export const getAllRidesAdmin = async () => {
+  const token = localStorage.getItem('token');
+  
+  const response = await apiClient.get('/ride/getallridesadmin', {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -16,7 +28,7 @@ export const createRide = async (rideData: {
   startAddress: string;
   endAddress: string;
   price: number;
-  driverTimeInSeconds: number;
+  arrivalTimeInSeconds: number;
 }) => {
   const token = localStorage.getItem('token');
   
@@ -55,8 +67,9 @@ export const getRideById = async (rideId: string) => {
 
 export const confirmRide = async (rideId: string) => {
   const token = localStorage.getItem('token');
+  const driverId = localStorage.getItem('userId'); 
 
-  const response = await apiClient.post('/ride/confirm', { rideId }, {
+  const response = await apiClient.post('/ride/confirm', { rideId, driverId }, {
     headers: {
       Authorization: `Bearer ${token}`
     }
@@ -64,6 +77,7 @@ export const confirmRide = async (rideId: string) => {
 
   return response.data;
 };
+
 
 export const getPendingRides = async () => {
   const token = localStorage.getItem('token');

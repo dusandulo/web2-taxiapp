@@ -17,6 +17,8 @@ using Microsoft.OpenApi.Models;
 using UserStateful;
 using Microsoft.EntityFrameworkCore;
 using Common.Models;
+using Microsoft.AspNetCore.SignalR;
+using Gateway.Hubs;
 
 namespace Gateway
 {
@@ -29,132 +31,125 @@ namespace Gateway
         {
             return new ServiceInstanceListener[]
             {
-                new ServiceInstanceListener(serviceContext =>
-                    new KestrelCommunicationListener(serviceContext, "ServiceEndpoint", (url, listener) =>
+        new ServiceInstanceListener(serviceContext =>
+            new KestrelCommunicationListener(serviceContext, "ServiceEndpoint", (url, listener) =>
+            {
+                ServiceEventSource.Current.ServiceMessage(serviceContext, $"Starting Kestrel on {url}");
+
+                var builder = WebApplication.CreateBuilder();
+
+                builder.Services.AddSignalR();
+                builder.Services.AddSingleton<StatelessServiceContext>(serviceContext);
+                builder.Services.AddSingleton<IRideCommunication, RideService>();
+
+                builder.WebHost
+                       .UseKestrel()
+                       .UseContentRoot(Directory.GetCurrentDirectory())
+                       .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.None)
+                       .UseUrls(url);
+
+                builder.Services.AddCors(options =>
+                {
+                    options.AddPolicy("AllowSpecificOrigins",
+                        builder =>
+                        {
+                            builder.WithOrigins("http://localhost:3000")
+                                   .AllowAnyMethod()
+                                   .AllowAnyHeader()
+                                   .AllowCredentials();
+                        });
+                });
+
+                builder.Services.AddControllers();
+                builder.Services.AddEndpointsApiExplorer();
+
+                builder.Services.AddSwaggerGen(c =>
+                {
+                    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Gateway API", Version = "v1" });
+
+                    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                     {
-                        ServiceEventSource.Current.ServiceMessage(serviceContext, $"Starting Kestrel on {url}");
+                        In = ParameterLocation.Header,
+                        Description = "Please enter into field the word 'Bearer' followed by a space and the JWT value",
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.ApiKey
+                    });
 
-                        var builder = WebApplication.CreateBuilder();
-                         builder.Services.AddSignalR();
-
-                        builder.Services.AddSingleton<StatelessServiceContext>(serviceContext);
-
-                        builder.WebHost
-                               .UseKestrel()
-                               .UseContentRoot(Directory.GetCurrentDirectory())
-                               .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.None)
-                               .UseUrls(url);
-
-                        builder.WebHost.UseUrls(url)
-                                   .UseKestrel()
-                                   .UseContentRoot(Directory.GetCurrentDirectory())
-                                   .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.None);
-
-                        builder.Services.AddCors(options =>
+                    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                    {
                         {
-                            options.AddPolicy("AllowSpecificOrigins",
-                                builder =>
-                                {
-                                    builder.WithOrigins("http://localhost:3000")
-                                           .AllowAnyMethod()
-                                           .AllowAnyHeader();
-                                });
-                        });
-
-                        builder.Services.AddControllers();
-                        builder.Services.AddEndpointsApiExplorer();
-
-                        builder.Services.AddSwaggerGen(c =>
-                        {
-                            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Gateway API", Version = "v1" });
-
-                            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                            new OpenApiSecurityScheme
                             {
-                                In = ParameterLocation.Header,
-                                Description = "Please enter into field the word 'Bearer' followed by a space and the JWT value",
-                                Name = "Authorization",
-                                Type = SecuritySchemeType.ApiKey
-                            });
-
-                            c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                            {
+                                Reference = new OpenApiReference
                                 {
-                                    new OpenApiSecurityScheme
-                                    {
-                                        Reference = new OpenApiReference
-                                        {
-                                            Type = ReferenceType.SecurityScheme,
-                                            Id = "Bearer"
-                                        }
-                                    },
-                                    Array.Empty<string>()
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer"
                                 }
-                            });
-                        });
-
-                        builder.Services.AddSingleton<IUserCommunication, UserService>();
-                        builder.Services.AddSingleton<IRideCommunication, RideService>();
-
-                        builder.Services.AddDbContext<UserDbContext>(options =>
-                            options.UseSqlServer(builder.Configuration.GetConnectionString("UserDatabase")));
-
-                        builder.Services.AddDbContext<RideDbContext>(options =>
-                            options.UseSqlServer(builder.Configuration.GetConnectionString("RideDatabase")));
-
-                        var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
-                        builder.Services.AddAuthentication(options =>
-                        {
-                            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                        })
-                        .AddJwtBearer(options =>
-                        {
-                            options.RequireHttpsMetadata = false;
-                            options.SaveToken = true;
-                            options.TokenValidationParameters = new TokenValidationParameters
-                            {
-                                ValidateIssuer = true,
-                                ValidateAudience = true,
-                                ValidateLifetime = true,
-                                ValidateIssuerSigningKey = true,
-                                ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                                ValidAudience = builder.Configuration["Jwt:Audience"],
-                                IssuerSigningKey = new SymmetricSecurityKey(key)
-                            };
-                        });
-
-                        builder.Services.AddAuthorization();
-
-                        builder.Services.AddHttpContextAccessor();
-
-                        var app = builder.Build();
-
-                        if (app.Environment.IsDevelopment())
-                        {
-                            app.UseSwagger();
-                            app.UseSwaggerUI(c =>
-                            {
-                                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Gateway API V1");
-                            });
+                            },
+                            Array.Empty<string>()
                         }
+                    });
+                });
 
-                        app.UseCors("AllowSpecificOrigins");
+                builder.Services.AddSingleton<IUserCommunication, UserService>();
 
-                        app.UseAuthentication();
-                        app.UseAuthorization();
+                builder.Services.AddDbContext<UserDbContext>(options =>
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("UserDatabase")));
 
-                        app.UseRouting();
-                        app.UseEndpoints(endpoints =>
-                            {
-                                endpoints.MapControllers();
-                                endpoints.MapHub<RideHub>("/rideHub");
-                            });
+                builder.Services.AddDbContext<RideDbContext>(options =>
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("RideDatabase")));
 
-                        app.MapControllers();
+                var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]);
+                builder.Services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = false;
+                    options.SaveToken = true;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                        ValidAudience = builder.Configuration["Jwt:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(key)
+                    };
+                });
 
-                        return app;
-                    }))
+                builder.Services.AddAuthorization();
+
+                builder.Services.AddHttpContextAccessor();
+
+                var app = builder.Build();
+
+                if (app.Environment.IsDevelopment())
+                {
+                    app.UseSwagger();
+                    app.UseSwaggerUI(c =>
+                    {
+                        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Gateway API V1");
+                    });
+                }
+
+                app.UseRouting();
+                app.UseCors("AllowSpecificOrigins");
+                app.UseAuthentication();
+                app.UseAuthorization();
+
+                app.MapControllers();
+                app.MapHub<RideHub>("/rideHub");
+
+                app.Run();
+
+                return app;
+            }))
             };
         }
+
     }
 }

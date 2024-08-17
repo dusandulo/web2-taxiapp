@@ -1,7 +1,9 @@
-﻿using Common.DTOs;
+﻿using Azure.Core;
+using Common.DTOs;
 using Common.Enums;
 using Common.Models;
 using Communication;
+using Gateway.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -16,20 +18,51 @@ namespace Gateway.Controllers
     public class RideController : ControllerBase
     {
         private readonly IRideCommunication _rideService;
+        private readonly IHubContext<RideHub, IRideHub> _rideHub;
 
-        public RideController(IRideCommunication rideService)
+        public RideController(IRideCommunication rideService, IHubContext<RideHub, IRideHub> rideHub)
         {
             _rideService = rideService;
+            _rideHub = rideHub;
         }
 
         [HttpGet("getallrides")]
-        public async Task<ActionResult<IEnumerable<RideModel>>> GetAllRides()
+        public async Task<ActionResult<IEnumerable<RideModel>>> GetAllRides([FromQuery] Guid? userId)
         {
-            var rides = await _rideService.GetAllRidesAsync();
-            return Ok(rides);
+            try
+            {
+                if (userId == null)
+                {
+                    return BadRequest("User ID is required.");
+                }
+
+                var rides = await _rideService.GetAllRidesAsync();
+
+                var filteredRides = rides.Where(ride => ride.PassengerId == userId || ride.DriverId == userId).ToList();
+
+                return Ok(filteredRides);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
-        // PUT api/ride/{rideId}/status
+        [HttpGet("getallridesadmin")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<RideModel>>> GetAllRides()
+        {
+            try
+            {
+                var rides = await _rideService.GetAllRidesAsync();
+                return Ok(rides);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
         [Authorize(Roles = "Driver")]
         [HttpPut("{rideId}/status")]
         public async Task<IActionResult> UpdateRideStatus(Guid rideId, [FromBody] RideStatus status)
@@ -65,24 +98,25 @@ namespace Gateway.Controllers
                 return BadRequest(ModelState);
             }
 
-            var newRide = await _rideService.CreateRideAsync(rideDto);
-
-            // SignalR: Obaveštavanje vozača o novoj vožnji
-            var hubContext = HttpContext.RequestServices.GetService<IHubContext<RideHub>>();
-            await hubContext.Clients.Group("Drivers").SendAsync("NewRide", newRide);
-
-            return Ok(newRide);
-        }
-        [HttpPost("settimes")]
-        public async Task<IActionResult> SetRideTimes([FromBody] SetRideTimesModelDto setRideTimesDto)
-        {
             try
             {
-                await _rideService.SetRideTimesAsync(setRideTimesDto.RideId, setRideTimesDto.ArrivalTimeInSeconds, setRideTimesDto.DriverTimeInSeconds);
-                return Ok();
+                var newRide = await _rideService.CreateRideAsync(rideDto);
+
+                try
+                {
+                    await _rideHub.Clients.Group("Drivers").NewRide(newRide);
+                    Console.WriteLine("New ride notification sent to drivers.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error sending new ride notification: {ex.Message}");
+                }
+
+                return Ok(newRide);
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error creating ride: {ex.Message}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -116,8 +150,11 @@ namespace Gateway.Controllers
                     return NotFound("Ride not found or already confirmed.");
                 }
 
-                var hubContext = HttpContext.RequestServices.GetService<IHubContext<RideHub>>();
-                await hubContext.Clients.Group(confirmRideDto.RideId.ToString()).SendAsync("RideConfirmed", confirmedRide);
+                // Poziv metode RideConfirmed na klijentskoj strani kroz IRideHub
+                await _rideHub.Clients.Group(confirmedRide.Id.ToString())
+                                      .RideConfirmed(confirmedRide);
+
+                Console.WriteLine($"RideConfirmed sent to passenger: {confirmedRide.PassengerId}");
 
                 return Ok(confirmedRide);
             }

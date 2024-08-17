@@ -13,6 +13,12 @@ using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Http;
 
 namespace UserStateful
 {
@@ -67,6 +73,7 @@ namespace UserStateful
 
         public async Task Register(UserModel user)
         {
+            // Validate the incoming user data
             if (string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.Password))
             {
                 throw new ArgumentException("Email and password are required.");
@@ -74,15 +81,25 @@ namespace UserStateful
 
             try
             {
+                // Use a scope to get the required DbContext for database operations
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+
+                    // Check if the user already exists
+                    var existingUser = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
+                    if (existingUser != null)
+                    {
+                        throw new InvalidOperationException("User already exists.");
+                    }
+
+                    // Add the new user to the database
                     await dbContext.Users.AddAsync(user);
                     await dbContext.SaveChangesAsync();
                 }
 
+                // Manage the user data in the reliable collection
                 var usersDict = await this.StateManager.GetOrAddAsync<IReliableDictionary<Guid, UserModel>>("users");
-
                 using (var tx = this.StateManager.CreateTransaction())
                 {
                     await usersDict.AddOrUpdateAsync(tx, user.Id, user, (k, v) => v);

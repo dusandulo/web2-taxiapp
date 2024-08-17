@@ -15,6 +15,7 @@ const Register: React.FC = () => {
   const [address, setAddress] = useState('');
   const [birthday, setBirthday] = useState('');
   const [isDriver, setIsDriver] = useState(false); 
+  const [profileImage, setProfileImage] = useState<File | null>(null); // State for profile image
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -25,18 +26,23 @@ const Register: React.FC = () => {
       return;
     }
 
-    try {
-      await register({
-        userName,
-        email,
-        password,
-        name: firstName,
-        lastName,
-        address,
-        birthday,
-        role: isDriver ? 2 : 1
-      });
+    // Create a FormData object to handle file uploads
+    const formData = new FormData();
+    formData.append('userName', userName);
+    formData.append('email', email);
+    formData.append('password', password);
+    formData.append('name', firstName);
+    formData.append('lastName', lastName);
+    formData.append('address', address);
+    formData.append('birthday', birthday);
+    formData.append('role', isDriver ? '2' : '1');
 
+    if (profileImage) {
+      formData.append('image', profileImage); // Add the profile image file to the form data
+    }
+
+    try {
+      await register(formData);
       navigate('/login');
     } catch (error) {
       console.error('Registration failed:', error);
@@ -49,7 +55,7 @@ const Register: React.FC = () => {
       <div className="login-box">
         <h2 className="login-title">Register</h2>
         <img className='logo-image' src={logo} alt="Taxi Logo"/>
-        <form className="login-form" onSubmit={handleRegister}>
+        <form className="login-form" onSubmit={handleRegister} encType="multipart/form-data">
           <label className="login-label">
             Username
             <input
@@ -135,6 +141,15 @@ const Register: React.FC = () => {
               value={birthday}
               onChange={(e) => setBirthday(e.target.value)}
               required
+            />
+          </label>
+          <label className="login-label">
+            Profile Image
+            <input
+              type="file"
+              accept="image/*"
+              className="login-input"
+              onChange={(e) => setProfileImage(e.target.files?.[0] || null)} // Set the profile image file
             />
           </label>
           <label className="login-label">

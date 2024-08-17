@@ -46,14 +46,14 @@ namespace RideStateful
         {
             try
             {
-                // Konvertovanje DTO u RideModel
                 var ride = new RideModel
                 {
-                    Id = Guid.NewGuid(), 
+                    Id = Guid.NewGuid(),
                     StartAddress = rideDto.StartAddress,
                     EndAddress = rideDto.EndAddress,
                     Price = rideDto.Price,
-                    DriverTimeInSeconds = rideDto.DriverTimeInSeconds,
+                    ArrivalTimeInSeconds = rideDto.ArrivalTimeInSeconds,
+                    DriverTimeInSeconds = rideDto.ArrivalTimeInSeconds,
                     DriverId = rideDto.DriverId ?? Guid.Empty, 
                     PassengerId = rideDto.PassengerId, 
                     Status = RideStatus.Pending
@@ -246,6 +246,23 @@ namespace RideStateful
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<RideDbContext>();
                     return await dbContext.Rides.Where(r => r.Status == RideStatus.Pending).ToListAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                ServiceEventSource.Current.ServiceMessage(this.Context, "Error retrieving pending rides: {0}", ex.Message);
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<RideModel>> GetConfirmedRidesAsync()
+        {
+            try
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<RideDbContext>();
+                    return await dbContext.Rides.Where(r => r.Status == RideStatus.Confirmed).ToListAsync();
                 }
             }
             catch (Exception ex)

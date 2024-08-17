@@ -1,14 +1,9 @@
 import apiClient from './apiClient';
 
-export const register = async (userData: {
-  userName: string;
-  email: string;
-  password: string;
-  name: string;
-  lastName: string;
-  address: string;
-  birthday: string;
-  role: number;
-}) => {
-  return apiClient.post('/users/register', userData);
+export const register = async (formData: FormData) => {
+  return apiClient.post('/users/register', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
 };

@@ -32,7 +32,7 @@ const CreateRide: React.FC = () => {
         startAddress: startAddress,
         endAddress: endAddress,
         price: estimatedPrice,
-        driverTimeInSeconds: estimatedTime
+        arrivalTimeInSeconds: estimatedTime
       };
 
       const createdRide = await createRide(rideData);
@@ -72,14 +72,14 @@ const CreateRide: React.FC = () => {
               required
             />
           </label>
-          <button type="submit" className="create-ride-button">Poruči</button>
+          <button type="submit" className="create-ride-button">Estimate time</button>
         </form>
 
         {estimatedPrice !== null && estimatedTime !== null && (
           <div className="ride-estimation">
             <p>Estimated Price: {estimatedPrice} RSD</p>
             <p>Estimated Waiting Time: {estimatedTime} seconds</p>
-            <button onClick={handleConfirm} className="create-ride-button">Potvrdi</button>
+            <button onClick={handleConfirm} className="create-ride-button">Order drive</button>
           </div>
         )}
       </div>
