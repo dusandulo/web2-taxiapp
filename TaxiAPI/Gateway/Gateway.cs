@@ -19,6 +19,8 @@ using Microsoft.EntityFrameworkCore;
 using Common.Models;
 using Microsoft.AspNetCore.SignalR;
 using Gateway.Hubs;
+using Communcation;
+using Gateway.Services;
 
 namespace Gateway
 {
@@ -41,6 +43,8 @@ namespace Gateway
                 builder.Services.AddSignalR();
                 builder.Services.AddSingleton<StatelessServiceContext>(serviceContext);
                 builder.Services.AddSingleton<IRideCommunication, RideService>();
+                builder.Services.AddSingleton<IRatingCommunication, RatingService>();
+
 
                 builder.WebHost
                        .UseKestrel()
@@ -143,6 +147,8 @@ namespace Gateway
 
                 app.MapControllers();
                 app.MapHub<RideHub>("/rideHub");
+
+                app.UseStaticFiles();
 
                 app.Run();
 

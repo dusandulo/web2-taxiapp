@@ -53,7 +53,7 @@ namespace RideStateful
                     EndAddress = rideDto.EndAddress,
                     Price = rideDto.Price,
                     ArrivalTimeInSeconds = rideDto.ArrivalTimeInSeconds,
-                    DriverTimeInSeconds = rideDto.ArrivalTimeInSeconds,
+                    DriverTimeInSeconds = 0,
                     DriverId = rideDto.DriverId ?? Guid.Empty, 
                     PassengerId = rideDto.PassengerId, 
                     Status = RideStatus.Pending
@@ -271,5 +271,35 @@ namespace RideStateful
                 throw;
             }
         }
+
+        public async Task<RideModel?> FinishRideAsync(Guid rideId, RideStatus status, int driverTimeInSeconds)
+        {
+            try
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<RideDbContext>();
+                    var ride = await dbContext.Rides.FindAsync(rideId);
+                    if (ride == null)
+                    {
+                        return null;
+                    }
+
+                    ride.Status = status;
+                    ride.DriverTimeInSeconds = driverTimeInSeconds;
+
+                    dbContext.Rides.Update(ride);
+                    await dbContext.SaveChangesAsync();
+
+                    return ride;
+                }
+            }
+            catch (Exception ex)
+            {
+                ServiceEventSource.Current.ServiceMessage(this.Context, "Error updating ride status: {0}", ex.Message);
+                throw;
+            }
+        }
+
     }
 }

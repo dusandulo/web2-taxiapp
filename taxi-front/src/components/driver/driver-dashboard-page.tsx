@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { getPendingRides, confirmRide } from '../../services/rideService';
+import React, { useState, useEffect } from 'react';
+import { getAllRides, confirmRide, finishRide } from '../../services/rideService';
 import { useNavigate } from 'react-router-dom';
 import hubConnection, { startConnection, subscribeToNewRides, subscribeToRideConfirmation } from '../../services/signalRService';
 import './DriverDashboardPage.css';
@@ -15,20 +15,37 @@ interface Ride {
 }
 
 const DriverDashboardPage: React.FC = () => {
-  const [pendingRides, setPendingRides] = useState<Ride[]>([]);
+  const [pendingAndActiveRides, setPendingAndActiveRides] = useState<Ride[]>([]);
+  const [finishedRides, setFinishedRides] = useState<Ride[]>([]);
+  const [arrivalTimers, setArrivalTimers] = useState<{ [key: string]: number }>({});
+  const [rideTimers, setRideTimers] = useState<{ [key: string]: number }>({});
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchPendingRides = async () => {
+    const fetchRides = async () => {
       try {
-        const pendingRidesData = await getPendingRides();
-        setPendingRides(pendingRidesData);
+        const userId = localStorage.getItem('userId');
+        if (!userId) return;
+
+        const allRidesData = await getAllRides(userId);
+        
+        // Filtrirajte vožnje na osnovu statusa
+        setPendingAndActiveRides(allRidesData.filter((ride: Ride) => ride.status !== 2));
+        setFinishedRides(allRidesData.filter((ride: Ride) => ride.status === 2));
+
+        const initialArrivalTimers: { [key: string]: number } = {};
+        allRidesData.forEach((ride: Ride) => {
+          if (ride.status === 1 && ride.arrivalTimeInSeconds > 0) {
+            initialArrivalTimers[ride.id] = ride.arrivalTimeInSeconds;
+          }
+        });
+        setArrivalTimers(initialArrivalTimers);
       } catch (error) {
-        console.error('Failed to fetch pending rides:', error);
+        console.error('Failed to fetch rides:', error);
       }
     };
 
-    fetchPendingRides();
+    fetchRides();
 
     startConnection().then(() => {
       const joinGroup = async () => {
@@ -43,13 +60,20 @@ const DriverDashboardPage: React.FC = () => {
       joinGroup();
 
       subscribeToNewRides((newRide: Ride) => {
-        setPendingRides((prevPendingRides) => [...prevPendingRides, newRide]);
+        setPendingAndActiveRides((prevRides) => [...prevRides, newRide]);
       });
 
       subscribeToRideConfirmation((confirmedRide: Ride) => {
-        setPendingRides((prevPendingRides) =>
-          prevPendingRides.filter((ride) => ride.id !== confirmedRide.id)
+        setPendingAndActiveRides((prevRides) =>
+          prevRides.map((ride) =>
+            ride.id === confirmedRide.id ? { ...ride, status: confirmedRide.status, arrivalTimeInSeconds: confirmedRide.arrivalTimeInSeconds } : ride
+          )
         );
+
+        setArrivalTimers((prevTimers) => ({
+          ...prevTimers,
+          [confirmedRide.id]: confirmedRide.arrivalTimeInSeconds,
+        }));
       });
     });
 
@@ -59,13 +83,89 @@ const DriverDashboardPage: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const arrivalInterval = setInterval(() => {
+      setArrivalTimers((prevTimers) => {
+        const newTimers = { ...prevTimers };
+        Object.keys(newTimers).forEach((rideId) => {
+          if (newTimers[rideId] > 0) {
+            newTimers[rideId] -= 1;
+          } else if (newTimers[rideId] === 0 && !(rideId in rideTimers)) {
+            setRideTimers((prevRideTimers) => ({
+              ...prevRideTimers,
+              [rideId]: 0,
+            }));
+          }
+        });
+        return newTimers;
+      });
+
+      setRideTimers((prevRideTimers) => {
+        const newRideTimers = { ...prevRideTimers };
+        Object.keys(newRideTimers).forEach((rideId) => {
+          if (newRideTimers[rideId] !== undefined) {
+            newRideTimers[rideId] += 1;
+          }
+        });
+        return newRideTimers;
+      });
+    }, 1000);
+
+    return () => clearInterval(arrivalInterval);
+  }, [arrivalTimers, rideTimers]);
+
   const handleAcceptRide = async (rideId: string) => {
     try {
       await confirmRide(rideId);
-      const updatedPendingRides = await getPendingRides();
-      setPendingRides(updatedPendingRides);
+
+      setPendingAndActiveRides((prevRides) =>
+        prevRides.map((ride) =>
+          ride.id === rideId ? { ...ride, status: 1 } : ride
+        )
+      );
+
+      setArrivalTimers((prevTimers) => ({
+        ...prevTimers,
+        [rideId]: pendingAndActiveRides.find(ride => ride.id === rideId)?.arrivalTimeInSeconds || 0,
+      }));
     } catch (error) {
       console.error('Failed to accept ride:', error);
+    }
+  };
+
+  const handleFinishRide = async (rideId: string) => {
+    if (arrivalTimers[rideId] > 0) return;
+
+    const rideTimeInSeconds = rideTimers[rideId] || 0;
+
+    try {
+      await finishRide(rideId, rideTimeInSeconds);
+
+      setPendingAndActiveRides((prevRides) =>
+        prevRides.map((ride) =>
+          ride.id === rideId ? { ...ride, status: 2 } : ride
+        )
+      );
+
+      setFinishedRides((prevFinishedRides) =>
+        [...prevFinishedRides, pendingAndActiveRides.find((ride) => ride.id === rideId)!]
+      );
+
+      // Ukloni tajmer nakon završetka vožnje
+      setRideTimers((prevRideTimers) => {
+        const newTimers = { ...prevRideTimers };
+        delete newTimers[rideId];
+        return newTimers;
+      });
+
+      setArrivalTimers((prevArrivalTimers) => {
+        const newArrivalTimers = { ...prevArrivalTimers };
+        delete newArrivalTimers[rideId];
+        return newArrivalTimers;
+      });
+
+    } catch (error) {
+      console.error('Failed to finish ride:', error);
     }
   };
 
@@ -100,19 +200,55 @@ const DriverDashboardPage: React.FC = () => {
         <button onClick={handleLogout} className="logout-button">Logout</button>
       </div>
       <div className="dashboard-box">
-        <h2 className="dashboard-title">Pending Rides</h2>
+        <h2 className="dashboard-title">Pending and Active Rides</h2>
         <ul className="rides-list">
-          {pendingRides.map((ride: Ride) => (
+          {pendingAndActiveRides.map((ride: Ride) => (
             <li key={ride.id} className="ride-item">
               <div className="ride-item-header">
                 <span className="ride-address">{ride.startAddress} to {ride.endAddress}</span>
-                <button onClick={() => handleAcceptRide(ride.id)} className="accept-ride-button">Accept Ride</button>
+                {ride.status === 0 && (
+                  <button onClick={() => handleAcceptRide(ride.id)} className="accept-ride-button">Accept Ride</button>
+                )}
+                {ride.status === 1 && (
+                  <>
+                    <div>
+                      {rideTimers[ride.id] !== undefined && (
+                        <div className="ride-time">Ride Time: {rideTimers[ride.id]} seconds</div>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => handleFinishRide(ride.id)}
+                      className="finish-ride-button"
+                      disabled={arrivalTimers[ride.id] > 0}
+                    >
+                      Finish Ride {arrivalTimers[ride.id] > 0 && `(${arrivalTimers[ride.id]}s)`}
+                    </button>
+                  </>
+                )}
               </div>
               <div className="ride-details">
                 <span className="ride-info">Price: ${ride.price}</span>
                 <span className={`ride-status ${getStatusClass(ride.status)}`}>
                   {ride.status === 0 && 'PENDING'}
                   {ride.status === 1 && 'CONFIRMED'}
+                  {ride.status === 2 && 'FINISHED'}
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        <h2 className="dashboard-title">Previous Rides</h2>
+        <ul className="rides-list">
+          {finishedRides.map((ride: Ride) => (
+            <li key={ride.id} className="ride-item">
+              <div className="ride-item-header">
+                <span className="ride-address">{ride.startAddress} to {ride.endAddress}</span>
+              </div>
+              <div className="ride-details">
+                <span className="ride-info">Price: ${ride.price}</span>
+                <span className="ride-info">Ride Time: {ride.driverTimeInSeconds} seconds</span>
+                <span className={`ride-status ${getStatusClass(ride.status)}`}>
                   {ride.status === 2 && 'FINISHED'}
                 </span>
               </div>

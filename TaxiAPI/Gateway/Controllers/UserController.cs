@@ -79,7 +79,7 @@ namespace Gateway.Controllers
                 await image.CopyToAsync(stream);
             }
 
-            return Path.Combine("images", fileName);
+            return (fileName);
         }
 
         [HttpPost("login")]

@@ -20,4 +20,25 @@
   .navigation-buttons button:hover {
     background-color: #ff6600;
   }
+  .finish-ride-button {
+    padding: 10px 15px;
+    background-color: #e60000;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .finish-ride-button:hover {
+    background-color: #cc0000;
+  }
+  .ride-time {
+    margin-top: 10px; 
+    font-size: 14px;
+    color: #333;
+    display: block;
+  }
+  
+  
   

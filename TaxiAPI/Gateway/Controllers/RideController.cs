@@ -178,5 +178,35 @@ namespace Gateway.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [Authorize(Roles = "Driver")]
+        [HttpPost("{rideId}/finish")]
+        public async Task<IActionResult> FinishRide([FromBody] FinishRideModelDto finishRideDto)
+        {
+            if (finishRideDto == null || finishRideDto.RideId == Guid.Empty)
+            {
+                return BadRequest(new { message = "Invalid ride data." });
+            }
+            try
+            {
+                var ride = await _rideService.GetRideByIdAsync(finishRideDto.RideId);
+                if (ride == null)
+                {
+                    return NotFound("Ride not found.");
+                }
+
+                var updatedRide = await _rideService.FinishRideAsync(finishRideDto.RideId, RideStatus.Finished, finishRideDto.RideTimeInSeconds);
+
+                await _rideHub.Clients.Group(ride.Id.ToString()).RideFinished(ride.Id);
+                Console.WriteLine($"RideFinished sent to passenger: {ride.PassengerId} and driver: {ride.DriverId}");
+
+
+                return Ok(updatedRide);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
     }
 }

@@ -17,7 +17,7 @@ namespace Communication
         Task SetRideTimesAsync(Guid rideId, int arrivalTimeInSeconds, int driverTimeInSeconds);
         Task<RideModel?> ConfirmRideAsync(Guid rideId, Guid driverId);
         Task<IEnumerable<RideModel>> GetPendingRidesAsync();
-
+        Task<RideModel?> FinishRideAsync(Guid rideId, RideStatus status, int driverTimeInSeconds);
         Task<IEnumerable<RideModel>> GetConfirmedRidesAsync();
 
     }

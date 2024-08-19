@@ -21,6 +21,11 @@ public class RideHub : Hub<IRideHub>
     {
         await Clients.Caller.UpdateRideTime(arrivalTimeInSeconds);
     }
+    public async Task FinishRide(Guid rideId)
+    {
+        await Clients.Group(rideId.ToString()).RideFinished(rideId);
+        Console.WriteLine($"Ride {rideId} has been finished.");
+    }
 
     public override async Task OnConnectedAsync()
     {

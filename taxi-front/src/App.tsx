@@ -9,6 +9,7 @@ import CreateRide from './components/user/create-ride/create-ride-page';
 import RideWaiting from './components/user/ride-waiting/ride-waiting-page';
 import UpdateProfilePage from './components/user/update-profile/update-profile-page';
 import ProtectedRoute from './components/ProtectedRoute';
+import RatingPage from './components/user/rate-driver/rate-page'; // Import RatingPage
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const App: React.FC = () => {
@@ -43,18 +44,19 @@ const App: React.FC = () => {
 
   return (
     <GoogleOAuthProvider clientId={clientId}>
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      
-      <Route element={<ProtectedRoute />}>
-        <Route path="/dashboard" element={renderDashboard()} />
-        <Route path="/create-ride" element={<CreateRide />} />
-        <Route path="/ride-waiting/:rideId" element={<RideWaiting />} />
-        <Route path="/update-profile" element={<UpdateProfilePage />} />
-      </Route>
-    </Routes>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={renderDashboard()} />
+          <Route path="/create-ride" element={<CreateRide />} />
+          <Route path="/ride-waiting/:rideId" element={<RideWaiting />} />
+          <Route path="/update-profile" element={<UpdateProfilePage />} />
+          <Route path="/rate/:rideId/:driverId" element={<RatingPage />} /> {/* Add the route for RatingPage */}
+        </Route>
+      </Routes>
     </GoogleOAuthProvider>
   );
 }

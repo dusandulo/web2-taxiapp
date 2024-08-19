@@ -86,5 +86,10 @@ namespace Communication
         {
             throw new NotImplementedException();
         }
+
+        public async Task<RideModel?> FinishRideAsync(Guid rideId, RideStatus status, int driverTimeInSeconds)
+        {
+            return await _rideCommunication.FinishRideAsync(rideId, status, driverTimeInSeconds);
+        }
     }
 }

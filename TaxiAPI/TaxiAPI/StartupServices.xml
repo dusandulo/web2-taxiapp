@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <StartupServicesManifest xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/2011/01/fabric">
   <Parameters>
+    <Parameter Name="RatingStateful_MinReplicaSetSize" DefaultValue="3" />
+    <Parameter Name="RatingStateful_PartitionCount" DefaultValue="1" />
+    <Parameter Name="RatingStateful_TargetReplicaSetSize" DefaultValue="3" />
     <Parameter Name="RideStateful_MinReplicaSetSize" DefaultValue="3" />
     <Parameter Name="RideStateful_PartitionCount" DefaultValue="1" />
     <Parameter Name="RideStateful_TargetReplicaSetSize" DefaultValue="3" />
@@ -15,6 +18,11 @@
          ServiceFabric PowerShell module.
 
          The attribute ServiceTypeName below must match the name defined in the imported ServiceManifest.xml file. -->
+    <Service Name="RatingStateful" ServicePackageActivationMode="ExclusiveProcess">
+      <StatefulService ServiceTypeName="RatingStatefulType" TargetReplicaSetSize="[RatingStateful_TargetReplicaSetSize]" MinReplicaSetSize="[RatingStateful_MinReplicaSetSize]">
+        <UniformInt64Partition PartitionCount="[RatingStateful_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
+      </StatefulService>
+    </Service>
     <Service Name="RideStateful" ServicePackageActivationMode="ExclusiveProcess">
       <StatefulService ServiceTypeName="RideStatefulType" TargetReplicaSetSize="[RideStateful_TargetReplicaSetSize]" MinReplicaSetSize="[RideStateful_MinReplicaSetSize]">
         <UniformInt64Partition PartitionCount="[RideStateful_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />

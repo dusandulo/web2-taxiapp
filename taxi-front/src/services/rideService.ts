@@ -90,3 +90,18 @@ export const getPendingRides = async () => {
 
   return response.data;
 };
+
+export const finishRide = async (rideId: string, rideTimeInSeconds: number) => {
+  const token = localStorage.getItem('token');
+  
+  const response = await apiClient.post(`/ride/${rideId}/finish`, 
+    { rideId, rideTimeInSeconds }, 
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data;
+};

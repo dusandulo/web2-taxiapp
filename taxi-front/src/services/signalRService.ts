@@ -40,10 +40,18 @@ export const subscribeToRideTimeUpdate = (callback: (timeUpdate: number) => void
   });
 };
 
+export const subscribeToRideFinished = (callback: (rideId: string) => void) => {
+  hubConnection.on('RideFinished', (rideId: string) => {
+    console.log('Ride finished:', rideId);
+    callback(rideId);
+  });
+};
+
 export const unsubscribeFromAll = () => {
   hubConnection.off('NewRide');
   hubConnection.off('RideConfirmed');
   hubConnection.off('UpdateRideTime');
+  hubConnection.off('RideFinished');
 };
 
 export default hubConnection;

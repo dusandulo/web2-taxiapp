@@ -14,13 +14,21 @@ const UpdateProfilePage: React.FC = () => {
     address: '',
     birthday: '',
     role: '',
+    image: '',  // Dodato polje za putanju slike
   });
+
+  const [imageUrl, setImageUrl] = useState<string | null>(null); // Drži puni URL slike
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
         const userProfile = await getUserProfile();
         setUser({ ...userProfile, password: '' });
+
+        // Ako postoji putanja slike, generiši puni URL
+        if (userProfile.image) {
+          setImageUrl(`${process.env.REACT_APP_IMAGE_BASE_URL}/${userProfile.image}`);
+        }
       } catch (error) {
         console.error('Failed to fetch user profile:', error);
       }
@@ -54,6 +62,11 @@ const UpdateProfilePage: React.FC = () => {
         <Link to="/dashboard" className="back-to-dashboard-link">Back to dashboard</Link>
       <div className="update-profile-box">
         <h2 className="update-profile-title">Update Profile</h2>
+        {imageUrl && (
+          <div className="profile-image-container">
+            <img src={imageUrl} alt="Profile" className="profile-image" />
+          </div>
+        )}
         <form className="update-profile-form" onSubmit={handleUpdateProfile}>
           <label className="update-profile-label">
             Username

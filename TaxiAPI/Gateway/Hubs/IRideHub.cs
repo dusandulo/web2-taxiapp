@@ -8,5 +8,6 @@ namespace Gateway.Hubs
         Task NewRide(RideModel ride);
         Task RideConfirmed(RideModel ride);
         Task UpdateRideTime(int arrivalTimeInSeconds);
+        Task RideFinished(Guid rideId);
     }
 }
