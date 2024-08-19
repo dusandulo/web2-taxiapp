@@ -1,43 +1,154 @@
 .dashboard-container {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: #f7f7f7;
-    padding: 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f7f7f7;
+  padding: 20px;
 }
 
 .navigation-buttons {
-    position: absolute; /* Apsolutno pozicioniranje unutar .dashboard-container */
-    top: 20px; /* Postavite 20px od vrha */
-    right: 20px; /* Postavite 20px od desne strane */
-    display: flex;
-    gap: 10px; /* Razmak između dugmadi */
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
 }
 
-.update-profile-button, .logout-button {
-    padding: 10px 20px;
-    background-color: #e65c00;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    transition: background-color 0.3s;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    text-align: center;
-    width: auto; /* Osigurava istu širinu dugmadi */
-    box-sizing: border-box;
-  }
-  
-  .update-profile-button:hover, .logout-button:hover {
-    background-color: #ff6600;
-  }
-  
+.navigation-buttons button {
+  padding: 10px 20px;
+  background-color: #e65c00;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s, transform 0.2s;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
 
-.logout-button {
-    border: none;
-    cursor: pointer;
+.navigation-buttons button:hover {
+  background-color: #ff6600;
+  transform: scale(1.05);
+}
+
+.dashboard-box {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 1000px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.dashboard-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #333;
+}
+
+.rides-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ride-item {
+  background-color: #f9f9f9;
+  margin-bottom: 15px;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s;
+  border: 2px solid #ddd;
+}
+
+.ride-item:hover {
+  background-color: #f1f1f1;
+}
+
+.ride-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.ride-address {
+  font-weight: bold;
+  color: #555;
+}
+
+.ride-info {
+  color: #777;
+  font-size: 14px;
+}
+
+.ride-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ride-status {
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 4px;
+  color: white;
+  width: fit-content;
+}
+
+.status-pending {
+  background-color: #ffc107;
+}
+
+.status-confirmed {
+  background-color: #28a745;
+}
+
+.status-finished {
+  background-color: darkgreen;
+}
+
+.driver-info {
+  margin-top: 15px;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+  display: block !important;
+  justify-content: space-around;
+}
+
+.driver-info h4 {
+  margin-bottom: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.driver-info p {
+  margin: 2px 0;
+  font-size: 14px;
+  color: #555;
+  display: inline-grid;
+  justify-content: left;
+}
+.verify-drivers-button {
+  padding: 10px 20px;
+  background-color: #3498db;
+  color: white;
+  border-radius: 4px;
+  transition: background-color 0.3s, transform 0.2s;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.verify-drivers-button:hover {
+  background-color: #2980b9;
+  transform: scale(1.05);
 }

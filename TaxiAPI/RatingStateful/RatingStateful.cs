@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Fabric;
 using System.Linq;
@@ -13,17 +13,27 @@ using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
+using Microsoft.ServiceFabric.Services.Client;
+using Microsoft.ServiceFabric.Services.Remoting.Client;
+using Communication;
+using System.Collections.Concurrent;
 
 namespace RatingStateful
 {
     internal sealed class RatingStateful : StatefulService, IRatingCommunication
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly IRatingStatelessCommunication _ratingStatelessService;
+        private readonly IRideCommunication _rideService;
 
         public RatingStateful(StatefulServiceContext context, IServiceProvider serviceProvider)
             : base(context)
         {
             _serviceProvider = serviceProvider;
+            _ratingStatelessService = ServiceProxy.Create<IRatingStatelessCommunication>(
+                new Uri("fabric:/TaxiAPI/RatingStateless"));
+            _rideService = ServiceProxy.Create<IRideCommunication>(
+                new Uri("fabric:/TaxiAPI/RideStateful"), new ServicePartitionKey(2)) ;
         }
 
         public async Task<bool> AddRatingAsync(RatingDto ratingDto)
@@ -66,22 +76,47 @@ namespace RatingStateful
         }
 
 
-        public async Task<IEnumerable<RatingModel>> GetRatingsForDriverAsync(Guid driverId)
+        public async Task<List<DriverRatingDto>> GetDriverRatingsAsync()
         {
             try
             {
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var dbContext = scope.ServiceProvider.GetRequiredService<RatingDbContext>();
-                    return await dbContext.Ratings.Where(r => r.DriverId == driverId).ToListAsync();
+                    var ratings = await dbContext.Ratings.ToListAsync();
+
+                    var groupedRatings = ratings.GroupBy(r => r.DriverId).ToList();
+
+                    var driverRatings = new List<DriverRatingDto>();
+
+                    foreach (var group in groupedRatings)
+                    {
+                        var averageRating = await _ratingStatelessService.CalculateAverageRatingAsync(group.Key, group.Select(r => r.RatingValue).ToList());
+
+                        var driver = await _rideService.GetDriverByIdAsync(group.Key);
+
+                        var driverRatingDto = new DriverRatingDto
+                        {
+                            DriverId = driver?.Id ?? group.Key,
+                            DriverName = driver?.Name,
+                            Email = driver?.Email,
+                            AverageRating = averageRating,
+                            RatingCount = group.Count(),
+                        };
+
+                        driverRatings.Add(driverRatingDto);
+                    }
+
+                    return driverRatings;
                 }
             }
             catch (Exception ex)
             {
-                ServiceEventSource.Current.ServiceMessage(this.Context, "Error retrieving ratings: {0}", ex.Message);
+                ServiceEventSource.Current.ServiceMessage(this.Context, "Error retrieving driver ratings: {0}", ex.Message);
                 throw;
             }
         }
+
 
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {

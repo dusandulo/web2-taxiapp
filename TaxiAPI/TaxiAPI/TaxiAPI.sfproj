@@ -40,6 +40,7 @@
       <ServiceLaunchUrl>http://localhost:{ServicePort}/swagger</ServiceLaunchUrl>
     </ProjectReference>
     <ProjectReference Include="..\RatingStateful\RatingStateful.csproj" />
+    <ProjectReference Include="..\RatingStateless\RatingStateless.csproj" />
     <ProjectReference Include="..\RideStateful\RideStateful.csproj" />
     <ProjectReference Include="..\UserStateful\UserStateful.csproj" />
   </ItemGroup>

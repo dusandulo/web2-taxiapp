@@ -19,6 +19,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Http;
+using Common.Enums;
 
 namespace UserStateful
 {
@@ -54,6 +55,25 @@ namespace UserStateful
             }
         }
 
+        public async Task<IEnumerable<UserModel>> GetUnverifiedDrivers()
+        {
+            try
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+                    return await dbContext.Users
+                                          .Where(u => u.Role == UserRole.Driver && u.VerificationState == VerificationState.Unverified)
+                                          .ToListAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                ServiceEventSource.Current.ServiceMessage(this.Context, "Error retrieving unverified drivers: {0}", ex.Message);
+                throw;
+            }
+        }
+
         public async Task<UserModel?> GetUserByEmail(string email)
         {
             try
@@ -67,6 +87,23 @@ namespace UserStateful
             catch (Exception ex)
             {
                 ServiceEventSource.Current.ServiceMessage(this.Context, "Error retrieving user from database: {0}", ex.Message);
+                throw;
+            }
+        }
+
+        public async Task<UserModel?> GetUserById(Guid userId)
+        {
+            try
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+                    return await dbContext.Users.FindAsync(userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                ServiceEventSource.Current.ServiceMessage(this.Context, "Error retrieving user by ID: {0}", ex.Message);
                 throw;
             }
         }
@@ -158,6 +195,49 @@ namespace UserStateful
             catch (Exception ex)
             {
                 ServiceEventSource.Current.ServiceMessage(this.Context, "Error updating user profile: {0}", ex.Message);
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateVerificationState(Guid userId, VerificationState state)
+        {
+            try
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+
+                    var user = await dbContext.Users.FindAsync(userId);
+                    if (user == null)
+                    {
+                        return false;
+                    }
+
+                    user.VerificationState = state;
+
+                    dbContext.Users.Update(user);
+                    await dbContext.SaveChangesAsync();
+                }
+
+                var usersDict = await this.StateManager.GetOrAddAsync<IReliableDictionary<Guid, UserModel>>("users");
+                using (var tx = this.StateManager.CreateTransaction())
+                {
+                    var userFromDict = await usersDict.TryGetValueAsync(tx, userId);
+                    if (userFromDict.HasValue)
+                    {
+                        var updatedUser = userFromDict.Value;
+                        updatedUser.VerificationState = state;
+                        await usersDict.SetAsync(tx, userId, updatedUser);
+                    }
+
+                    await tx.CommitAsync();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ServiceEventSource.Current.ServiceMessage(this.Context, "Error updating verification state: {0}", ex.Message);
                 throw;
             }
         }

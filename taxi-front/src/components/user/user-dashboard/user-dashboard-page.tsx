@@ -68,12 +68,12 @@ const UserDashboardPage: React.FC = () => {
           {rides.map((ride: Ride) => (
             <li key={ride.id} className="ride-item">
               <div className="ride-item-header">
-                <span className="ride-address">{ride.startAddress} to {ride.endAddress}</span>
-                <span className="ride-info">Price: ${ride.price}</span>
+                <span className="ride-address">From: {ride.startAddress} To: {ride.endAddress}</span>
               </div>
               <div className="ride-details">
                 <span className="ride-info">Driver Time: {ride.driverTimeInSeconds} seconds</span>
                 <span className="ride-info">Arrival Time: {ride.arrivalTimeInSeconds} seconds</span>
+                <span className="ride-info">Price: {ride.price}RSD</span>
                 <span className={`ride-status ${getStatusClass(ride.status)}`}>
                   {ride.status === 0 && 'PENDING'}
                   {ride.status === 1 && 'CONFIRMED'}

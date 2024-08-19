@@ -12,6 +12,6 @@ namespace Communcation
     public interface IRatingCommunication : IService
     {
         Task<bool> AddRatingAsync(RatingDto ratingDto);
-        Task<IEnumerable<RatingModel>> GetRatingsForDriverAsync(Guid driverId);
+        Task<List<DriverRatingDto>> GetDriverRatingsAsync();
     }
 }

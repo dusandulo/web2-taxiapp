@@ -12,15 +12,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.7" />
     <PackageReference Include="Microsoft.ServiceFabric.Services" Version="7.1.2175" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\Communcation\Communcation.csproj" />
-    <ProjectReference Include="..\UserStateful\UserStateful.csproj" />
   </ItemGroup>
 
 </Project>

@@ -7,6 +7,7 @@ using Common.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Services.Runtime;
+using UserStateful;
 
 namespace RideStateful
 {
@@ -38,6 +39,7 @@ namespace RideStateful
 
                 var provider = new ServiceCollection()
                     .AddDbContext<RideDbContext>(options => options.UseSqlServer(connectionString))
+                    .AddDbContext<UserDbContext>(options => options.UseSqlServer(connectionString))
                     .BuildServiceProvider();
 
                 ServiceRuntime.RegisterServiceAsync("RideStatefulType",

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getAllRides, confirmRide, finishRide } from '../../services/rideService';
+import { getUserProfileById } from '../../services/userService';
 import { useNavigate } from 'react-router-dom';
 import hubConnection, { startConnection, subscribeToNewRides, subscribeToRideConfirmation } from '../../services/signalRService';
 import './DriverDashboardPage.css';
@@ -14,22 +15,49 @@ interface Ride {
   status: number;
 }
 
+enum VerificationState {
+  Verified = 'Verified',
+  Unverified = 'Unverified',
+  Blocked = 'Blocked',
+}
+
 const DriverDashboardPage: React.FC = () => {
   const [pendingAndActiveRides, setPendingAndActiveRides] = useState<Ride[]>([]);
   const [finishedRides, setFinishedRides] = useState<Ride[]>([]);
   const [arrivalTimers, setArrivalTimers] = useState<{ [key: string]: number }>({});
   const [rideTimers, setRideTimers] = useState<{ [key: string]: number }>({});
+  const [userVerificationState, setUserVerificationState] = useState<VerificationState | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+          navigate('/login');
+          return;
+        }
+
+        const userProfile = await getUserProfileById(userId); // Preuzmi profil prema ID-u
+        setUserVerificationState(userProfile.verificationState);
+
+        if (userProfile.verificationState !== VerificationState.Verified) {
+          return; // Ako korisnik nije verifikovan, ne učitavajte ostale podatke
+        }
+
+        fetchRides();
+      } catch (error) {
+        console.error('Failed to fetch user profile:', error);
+        navigate('/login');
+      }
+    };
+
     const fetchRides = async () => {
       try {
         const userId = localStorage.getItem('userId');
         if (!userId) return;
 
         const allRidesData = await getAllRides(userId);
-        
-        // Filtrirajte vožnje na osnovu statusa
         setPendingAndActiveRides(allRidesData.filter((ride: Ride) => ride.status !== 2));
         setFinishedRides(allRidesData.filter((ride: Ride) => ride.status === 2));
 
@@ -45,7 +73,11 @@ const DriverDashboardPage: React.FC = () => {
       }
     };
 
-    fetchRides();
+    fetchUserProfile();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (userVerificationState !== VerificationState.Verified) return;
 
     startConnection().then(() => {
       const joinGroup = async () => {
@@ -81,7 +113,7 @@ const DriverDashboardPage: React.FC = () => {
       hubConnection.off('NewRide');
       hubConnection.off('RideConfirmed');
     };
-  }, []);
+  }, [userVerificationState]);
 
   useEffect(() => {
     const arrivalInterval = setInterval(() => {
@@ -151,7 +183,6 @@ const DriverDashboardPage: React.FC = () => {
         [...prevFinishedRides, pendingAndActiveRides.find((ride) => ride.id === rideId)!]
       );
 
-      // Ukloni tajmer nakon završetka vožnje
       setRideTimers((prevRideTimers) => {
         const newTimers = { ...prevRideTimers };
         delete newTimers[rideId];
@@ -193,6 +224,28 @@ const DriverDashboardPage: React.FC = () => {
     }
   };
 
+  if (userVerificationState === VerificationState.Blocked) {
+    return (
+      <div className="blocked-container">
+        <h1>Your account has been blocked</h1>
+        <p>
+          Unfortunately, your account is currently blocked. Please contact our support team for further assistance or to resolve any issues.
+        </p>
+      </div>
+    );
+  }
+  
+  if (userVerificationState === VerificationState.Unverified) {
+    return (
+      <div className="unverified-container">
+        <h1>Your account is not verified yet</h1>
+        <p>
+          Your account is pending verification. Our team is reviewing your details. Please check back later or contact support if you have any questions.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard-container">
       <div className="navigation-buttons">
@@ -206,34 +259,36 @@ const DriverDashboardPage: React.FC = () => {
             <li key={ride.id} className="ride-item">
               <div className="ride-item-header">
                 <span className="ride-address">{ride.startAddress} to {ride.endAddress}</span>
-                {ride.status === 0 && (
-                  <button onClick={() => handleAcceptRide(ride.id)} className="accept-ride-button">Accept Ride</button>
-                )}
-                {ride.status === 1 && (
-                  <>
-                    <div>
-                      {rideTimers[ride.id] !== undefined && (
-                        <div className="ride-time">Ride Time: {rideTimers[ride.id]} seconds</div>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => handleFinishRide(ride.id)}
-                      className="finish-ride-button"
-                      disabled={arrivalTimers[ride.id] > 0}
-                    >
-                      Finish Ride {arrivalTimers[ride.id] > 0 && `(${arrivalTimers[ride.id]}s)`}
-                    </button>
-                  </>
-                )}
               </div>
               <div className="ride-details">
-                <span className="ride-info">Price: ${ride.price}</span>
+                <span className="ride-info">Price: {ride.price}RSD</span>
                 <span className={`ride-status ${getStatusClass(ride.status)}`}>
                   {ride.status === 0 && 'PENDING'}
                   {ride.status === 1 && 'CONFIRMED'}
                   {ride.status === 2 && 'FINISHED'}
                 </span>
+                <div className='acceptance-button'>
+                  {ride.status === 0 && (
+                    <button onClick={() => handleAcceptRide(ride.id)} className="accept-ride-button">Accept Ride</button>
+                  )}
+                </div>
               </div>
+              {ride.status === 1 && (
+                <>
+                  <div>
+                    {rideTimers[ride.id] !== undefined && (
+                      <div className="ride-time">Ride Time: {rideTimers[ride.id]} seconds</div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => handleFinishRide(ride.id)}
+                    className="finish-ride-button"
+                    disabled={arrivalTimers[ride.id] > 0}
+                  >
+                    Finish Ride {arrivalTimers[ride.id] > 0 && `(${arrivalTimers[ride.id]}s)`}
+                  </button>
+                </>
+              )}
             </li>
           ))}
         </ul>
@@ -243,10 +298,10 @@ const DriverDashboardPage: React.FC = () => {
           {finishedRides.map((ride: Ride) => (
             <li key={ride.id} className="ride-item">
               <div className="ride-item-header">
-                <span className="ride-address">{ride.startAddress} to {ride.endAddress}</span>
+                <span className="ride-address">From: {ride.startAddress} To: {ride.endAddress}</span>
               </div>
               <div className="ride-details">
-                <span className="ride-info">Price: ${ride.price}</span>
+                <span className="ride-info">Price: {ride.price}RSD</span>
                 <span className="ride-info">Ride Time: {ride.driverTimeInSeconds} seconds</span>
                 <span className={`ride-status ${getStatusClass(ride.status)}`}>
                   {ride.status === 2 && 'FINISHED'}

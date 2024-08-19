@@ -1,44 +1,219 @@
+.dashboard-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+  padding: 20px;
+}
+
 .navigation-buttons {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    gap: 10px; /* Razmak između dugmadi */
-  }
-  
-  .navigation-buttons button {
-    padding: 10px 20px;
-    background-color: #e65c00;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    font-size: 16px;
-  }
-  
-  .navigation-buttons button:hover {
-    background-color: #ff6600;
-  }
-  .finish-ride-button {
-    padding: 10px 15px;
-    background-color: #e60000;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .finish-ride-button:hover {
-    background-color: #cc0000;
-  }
-  .ride-time {
-    margin-top: 10px; 
-    font-size: 14px;
-    color: #333;
-    display: block;
-  }
-  
-  
-  
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.navigation-buttons button {
+  padding: 10px 20px;
+  background-color: #e65c00;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 16px;
+}
+
+.navigation-buttons button:hover {
+  background-color: #ff6600;
+}
+
+.dashboard-box {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.dashboard-title {
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #333;
+  text-align: center;
+}
+
+.rides-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ride-item {
+  background-color: #fafafa;
+  margin-bottom: 15px;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s;
+}
+
+.ride-item:hover {
+  background-color: #f1f1f1;
+}
+
+.ride-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.ride-address {
+  font-weight: bold;
+  color: #555;
+  font-size: 18px;
+}
+
+.ride-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.ride-info {
+  color: #777;
+  font-size: 14px;
+}
+
+.ride-status {
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 4px;
+  color: white;
+  width: fit-content;
+  font-size: 14px;
+}
+
+.status-pending {
+  background-color: #ffc107;
+}
+
+.status-confirmed {
+  background-color: #28a745;
+}
+
+.status-finished {
+  background-color: #007bff;
+}
+
+.accept-ride-button {
+  padding: 10px 15px;
+  background-color: green;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.accept-ride-button:hover {
+  background-color: darkgreen;
+}
+
+.finish-ride-button {
+  padding: 10px 15px;
+  background-color: #e60000;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+}
+
+.finish-ride-button:hover {
+  background-color: #cc0000;
+}
+
+.finish-ride-button:disabled {
+  background-color: #999999;
+  cursor: not-allowed;
+}
+
+.ride-time {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #333;
+}
+
+.previous-rides-list {
+  margin-top: 20px;
+}
+
+.previous-rides-list .ride-item {
+  background-color: #e9ecef;
+}
+
+.previous-rides-list .ride-item-header {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+.acceptance-button{
+  display: flex;
+  justify-content: center;
+}
+.blocked-container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #ffe6e6;
+  border: 1px solid #ff4d4d;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.blocked-container h1 {
+  color: #cc0000;
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.blocked-container p {
+  color: #660000;
+  font-size: 16px;
+  margin-top: 0;
+}
+.unverified-container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #fff0b3;
+  border: 1px solid #ffcc00;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.unverified-container h1 {
+  color: #e6b800;
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.unverified-container p {
+  color: #806600;
+  font-size: 16px;
+  margin-top: 0;
+}

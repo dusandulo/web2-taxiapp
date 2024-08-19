@@ -9,6 +9,7 @@ using Communication;
 using Common.DTOs;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
+using System.Fabric;
 
 namespace Communication
 {
@@ -90,6 +91,11 @@ namespace Communication
         public async Task<RideModel?> FinishRideAsync(Guid rideId, RideStatus status, int driverTimeInSeconds)
         {
             return await _rideCommunication.FinishRideAsync(rideId, status, driverTimeInSeconds);
+        }
+
+        public async Task<DriverDto?> GetDriverByIdAsync(Guid driverId)
+        {
+            return await _rideCommunication.GetDriverByIdAsync(driverId);
         }
     }
 }

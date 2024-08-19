@@ -9,7 +9,9 @@ import CreateRide from './components/user/create-ride/create-ride-page';
 import RideWaiting from './components/user/ride-waiting/ride-waiting-page';
 import UpdateProfilePage from './components/user/update-profile/update-profile-page';
 import ProtectedRoute from './components/ProtectedRoute';
-import RatingPage from './components/user/rate-driver/rate-page'; // Import RatingPage
+import RatingPage from './components/user/rate-driver/rate-page';
+import DriverRatingsPage from './components/admin/driver-rating/driver-rating-page';
+import VerifyDriversPage from './components/admin/verify-driver/verify-drivers-page';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const App: React.FC = () => {
@@ -54,7 +56,9 @@ const App: React.FC = () => {
           <Route path="/create-ride" element={<CreateRide />} />
           <Route path="/ride-waiting/:rideId" element={<RideWaiting />} />
           <Route path="/update-profile" element={<UpdateProfilePage />} />
-          <Route path="/rate/:rideId/:driverId" element={<RatingPage />} /> {/* Add the route for RatingPage */}
+          <Route path="/rate/:rideId/:driverId" element={<RatingPage />} />
+          <Route path="/driver-ratings" element={<DriverRatingsPage />} />
+          <Route path="/verify-drivers" element={<VerifyDriversPage />} />
         </Route>
       </Routes>
     </GoogleOAuthProvider>

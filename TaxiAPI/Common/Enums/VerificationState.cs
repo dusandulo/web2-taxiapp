@@ -4,6 +4,7 @@
     {
         Verified = 0,
         Unverified = 1,
-        Processing = 2
+        Processing = 2,
+        Blocked = 3,
     }
 }

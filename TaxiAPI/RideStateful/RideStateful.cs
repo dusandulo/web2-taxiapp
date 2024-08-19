@@ -12,6 +12,8 @@ using Common.Enums;
 using Communication;
 using Microsoft.EntityFrameworkCore;
 using Common.DTOs;
+using UserStateful;
+using Microsoft.Extensions.Configuration;
 
 namespace RideStateful
 {
@@ -297,6 +299,32 @@ namespace RideStateful
             catch (Exception ex)
             {
                 ServiceEventSource.Current.ServiceMessage(this.Context, "Error updating ride status: {0}", ex.Message);
+                throw;
+            }
+        }
+
+        public async Task<DriverDto?> GetDriverByIdAsync(Guid driverId)
+        {
+            try
+            {
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+                    var driver = await dbContext.Users.FindAsync(driverId);
+
+                    if (driver == null) return null;
+
+                    return new DriverDto
+                    {
+                        Id = driver.Id,
+                        Name = driver.Name,
+                        Email = driver.Email,
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                ServiceEventSource.Current.ServiceMessage(this.Context, "Error retrieving driver: {0}", ex.Message);
                 throw;
             }
         }

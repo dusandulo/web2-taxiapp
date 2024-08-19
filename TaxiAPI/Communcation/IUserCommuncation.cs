@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Common.Models;
 using Microsoft.AspNetCore.Http;
+using Common.Enums;
 
 namespace Communication
 {
@@ -17,5 +18,8 @@ namespace Communication
         Task<UserModel?> GetUserByEmail(string email);
         Task<string?> Authenticate(string email, string password);
         Task UpdateProfile(UserModel user);
+        Task<bool> UpdateVerificationState(Guid userId, VerificationState state);
+        Task<IEnumerable<UserModel>> GetUnverifiedDrivers();
+        Task<UserModel?> GetUserById(Guid userId);
     }
 }

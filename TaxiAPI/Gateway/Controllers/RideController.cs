@@ -50,12 +50,38 @@ namespace Gateway.Controllers
 
         [HttpGet("getallridesadmin")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<IEnumerable<RideModel>>> GetAllRides()
+        public async Task<ActionResult<IEnumerable<RideWithDriverDto>>> GetAllRides()
         {
             try
             {
                 var rides = await _rideService.GetAllRidesAsync();
-                return Ok(rides);
+
+                var ridesWithDriverInfo = new List<RideWithDriverDto>();
+
+                foreach (var ride in rides)
+                {
+                    var driver = await _rideService.GetDriverByIdAsync(ride.DriverId);
+                    var rideWithDriver = new RideWithDriverDto
+                    {
+                        Id = ride.Id,
+                        StartAddress = ride.StartAddress,
+                        EndAddress = ride.EndAddress,
+                        Price = ride.Price,
+                        DriverTimeInSeconds = ride.DriverTimeInSeconds,
+                        ArrivalTimeInSeconds = ride.ArrivalTimeInSeconds,
+                        Status = ride.Status,
+                        Driver = driver != null ? new DriverDto
+                        {
+                            Id = driver.Id,
+                            Name = driver.Name,
+                            Email = driver.Email,
+                        } : null
+                    };
+
+                    ridesWithDriverInfo.Add(rideWithDriver);
+                }
+
+                return Ok(ridesWithDriverInfo);
             }
             catch (Exception ex)
             {

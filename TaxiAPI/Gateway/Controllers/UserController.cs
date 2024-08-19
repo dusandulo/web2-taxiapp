@@ -28,8 +28,6 @@ namespace Gateway.Controllers
         public async Task<IActionResult> Register([FromForm] RegisterUserDto user)
         {
             string? imagePath = null;
-
-            // Kreiraj UserModel instancu i popuni je podacima iz DTO-a
             UserModel newUser = new UserModel
             {
                 UserName = user.UserName,
@@ -42,7 +40,6 @@ namespace Gateway.Controllers
                 Role = user.Role
             };
 
-            // Ako postoji slika, snimi je i dodaj putanju do slike u UserModel
             if (user.Image != null && user.Image.Length > 0)
             {
                 imagePath = await SaveImage(user.Image);
@@ -150,6 +147,89 @@ namespace Gateway.Controllers
         public async Task<IActionResult> GetUserByEmail(string email)
         {
             var user = await _userCommunication.GetUserByEmail(email);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            return Ok(user);
+        }
+        [HttpPost("block/{userId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> BlockUser(Guid userId)
+        {
+            try
+            {
+                var success = await _userCommunication.UpdateVerificationState(userId, VerificationState.Blocked);
+                if (success)
+                {
+                    return Ok("User blocked successfully.");
+                }
+                return NotFound("User not found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("unblock/{userId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UnblockUser(Guid userId)
+        {
+            try
+            {
+                var success = await _userCommunication.UpdateVerificationState(userId, VerificationState.Verified);
+                if (success)
+                {
+                    return Ok("User unblocked successfully.");
+                }
+                return NotFound("User not found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("unverified-drivers")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetUnverifiedDrivers()
+        {
+            try
+            {
+                var drivers = await _userCommunication.GetUnverifiedDrivers();
+                return Ok(drivers);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("verify/{userId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> VerifyDriver(Guid userId)
+        {
+            try
+            {
+                var success = await _userCommunication.UpdateVerificationState(userId, VerificationState.Verified);
+                if (success)
+                {
+                    return Ok("Driver verified successfully.");
+                }
+                return NotFound("Driver not found.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+        [HttpGet("{id}")]
+        [Authorize]
+        public async Task<IActionResult> GetUserById(Guid id)
+        {
+            var user = await _userCommunication.GetUserById(id);
             if (user == null)
             {
                 return NotFound(new { message = "User not found" });

@@ -10,6 +10,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Net.Mail;
+using System.Net;
 
 namespace Communication
 {
@@ -39,7 +41,7 @@ namespace Communication
 
             user.Id = Guid.NewGuid();
             user.Password = HashPassword(user.Password);
-            user.VerificationState = user.Role == UserRole.Driver ? VerificationState.Processing : VerificationState.Verified;
+            user.VerificationState = user.Role == UserRole.Driver ? VerificationState.Unverified : VerificationState.Verified;
 
             await _userCommunication.Register(user);
         }
@@ -137,6 +139,47 @@ namespace Communication
 
             if (string.IsNullOrWhiteSpace(user.LastName))
                 throw new ArgumentException("LastName is required.", nameof(user.LastName));
+        }
+
+        public async Task<bool> UpdateVerificationState(Guid userId, VerificationState state)
+        {
+            var success = await _userCommunication.UpdateVerificationState(userId, state);
+            if (success && state == VerificationState.Verified)
+            {
+                var user = await GetUserById(userId);
+                if (user != null)
+                {
+                    SendVerificationEmail(user.Email, user.Name);
+                }
+            }
+            return success;
+        }
+
+        private void SendVerificationEmail(string toEmail, string userName)
+        {
+            var smtpClient = new SmtpClient("sandbox.smtp.mailtrap.io", 2525)
+            {
+                Credentials = new NetworkCredential("c94feac755e586", "46f367e560adf7"),
+                EnableSsl = true
+            };
+
+            var fromEmail = "administrator@taxiapi.com";
+            var subject = "[Taxi API] Your profile has been verified";
+            var body = $"Dear {userName},\n\nYour profile has been successfully verified.\nBest regards,\nTaxi API";
+
+            var mailMessage = new MailMessage(fromEmail, toEmail, subject, body);
+
+            smtpClient.Send(mailMessage);
+        }
+
+        public async Task<IEnumerable<UserModel>> GetUnverifiedDrivers()
+        {
+            return await _userCommunication.GetUnverifiedDrivers();
+        }
+
+        public async Task<UserModel?> GetUserById(Guid userId)
+        {
+            return await _userCommunication.GetUserById(userId);
         }
     }
 }

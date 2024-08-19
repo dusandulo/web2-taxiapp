@@ -29,3 +29,27 @@ export const getRatingsForDriver = async (driverId: string) => {
 
   return response.data;
 };
+
+export const getDriverRatings = async () => {
+  const token = localStorage.getItem('token');
+  
+  const response = await apiClient.get('/ratings/getaverageratings', {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  return response.data;
+};
+
+export const blockDriver = async (driverId: string) => {
+  const token = localStorage.getItem('token');
+  
+  const response = await apiClient.post(`/ride/block/${driverId}`, {}, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  return response.data;
+};

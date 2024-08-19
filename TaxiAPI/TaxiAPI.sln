@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserStateful", "UserStatefu
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RideStateful", "RideStateful\RideStateful.csproj", "{3DFFF2EA-786A-4E57-ABD6-62C292809184}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RatingStateful", "RatingStateful\RatingStateful.csproj", "{EE3F3098-73F1-435B-936E-3B5D067A96D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RatingStateful", "RatingStateful\RatingStateful.csproj", "{EE3F3098-73F1-435B-936E-3B5D067A96D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RatingStateless", "RatingStateless\RatingStateless.csproj", "{6BD07759-26E0-42E7-9384-64BB3F77DAC8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -85,6 +87,14 @@ Global
 		{EE3F3098-73F1-435B-936E-3B5D067A96D1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EE3F3098-73F1-435B-936E-3B5D067A96D1}.Release|x64.ActiveCfg = Release|Any CPU
 		{EE3F3098-73F1-435B-936E-3B5D067A96D1}.Release|x64.Build.0 = Release|Any CPU
+		{6BD07759-26E0-42E7-9384-64BB3F77DAC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BD07759-26E0-42E7-9384-64BB3F77DAC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BD07759-26E0-42E7-9384-64BB3F77DAC8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6BD07759-26E0-42E7-9384-64BB3F77DAC8}.Debug|x64.Build.0 = Debug|Any CPU
+		{6BD07759-26E0-42E7-9384-64BB3F77DAC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BD07759-26E0-42E7-9384-64BB3F77DAC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BD07759-26E0-42E7-9384-64BB3F77DAC8}.Release|x64.ActiveCfg = Release|Any CPU
+		{6BD07759-26E0-42E7-9384-64BB3F77DAC8}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

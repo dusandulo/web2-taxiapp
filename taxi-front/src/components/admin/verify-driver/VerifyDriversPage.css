@@ -1,0 +1,83 @@
+.verify-drivers-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between; /* Ovo pozicionira naslov i dugme na suprotne strane */
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .verify-drivers-container h2 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .drivers-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .driver-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .driver-item:hover {
+    background-color: #f1f1f1;
+    transform: translateY(-3px);
+  }
+  
+  .driver-info p {
+    margin: 5px 0;
+    font-size: 16px;
+    color: #555;
+  }
+  
+  .verify-button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .verify-button:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+  }
+  
+  .back-to-dashboard-button {
+    background-color: #e65c00;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .back-to-dashboard-button:hover {
+    background-color: #ff6600;
+    transform: translateY(-2px);
+  }
+  

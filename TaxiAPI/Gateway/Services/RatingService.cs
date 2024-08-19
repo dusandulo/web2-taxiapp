@@ -15,7 +15,7 @@ namespace Gateway.Services
         public RatingService(IConfiguration configuration)
         {
             _ratingCommunication = ServiceProxy.Create<IRatingCommunication>(
-                new Uri("fabric:/TaxiAPI/RatingStateful"), new ServicePartitionKey(1));
+                new Uri("fabric:/TaxiAPI/RatingStateful"), new ServicePartitionKey(3));
         }
 
         public async Task<bool> AddRatingAsync(RatingDto ratingDto)
@@ -23,9 +23,9 @@ namespace Gateway.Services
             return await _ratingCommunication.AddRatingAsync(ratingDto);
         }
 
-        public async Task<IEnumerable<RatingModel>> GetRatingsForDriverAsync(Guid driverId)
+        public async Task<List<DriverRatingDto>> GetDriverRatingsAsync()
         {
-            return await _ratingCommunication.GetRatingsForDriverAsync(driverId);
+            return await _ratingCommunication.GetDriverRatingsAsync();
         }
     }
 }
